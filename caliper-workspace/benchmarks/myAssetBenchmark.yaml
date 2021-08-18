@@ -1,0 +1,19 @@
+test:
+    name: basic-contract-benchmark
+    description: test benchmark
+    workers:
+      type: local
+      number: 10
+    rounds:
+      - label: round1
+        description: Update asset benchmark
+        txDuration: 20
+        rateControl: 
+          type: fixed-rate
+          opts:
+            tps: 100
+        workload:
+          module: workload/updateAsset.js
+          arguments:
+            assets: 50
+            contractId: basic
