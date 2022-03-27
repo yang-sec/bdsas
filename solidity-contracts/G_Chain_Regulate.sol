@@ -9,19 +9,19 @@ pragma solidity >=0.7.0 <0.9.0;
 contract BDSAS_Regulate {
 
     struct Server { // SAS server
-        bytes32 desc; // Description, e.g., name, IP address, other credentials.
+        string desc; // Description, e.g., name, IP address, other credentials.
         uint8 status; // 0: valid, 1: invalid
     }
 
     struct Witness { // SAS server
-        bytes32 desc; // Description, e.g., name, IP address, other credentials.
+        string desc; // Description, e.g., name, IP address, other credentials.
         uint8 status; // 0: valid, 1: invalid
         bool reshuffle_vote; // For confirming a reshuffle proposal
         bool update_vote; // For confirming an update
     }
 
     struct Regulation { // Short-term regulation, e.g., "order to vacate" due to incumbent arrival
-        bytes32 desc; // Description of regulation content
+        string desc; // Description of regulation content
         uint start_time;
         uint end_time;
         uint8 status; // 0: valid, 1: invalid
@@ -29,21 +29,24 @@ contract BDSAS_Regulate {
 
     struct Proposal { // Verifiable random function (VRF) proposal (based on ed25519)
         bytes32 pubkey; // Public key - 32 bytes
-        bytes32[2] hash; // Hash - 64 bytes
-        bytes32[3] proof; // Proof - 80 bytes
+        bytes32 hash_1; // Hash - first 32 bytes
+        bytes32 hash_2; // Hash - second 32 bytes
+        bytes32 proof_1;  // Proof - first 32 bytes
+        bytes32 proof_2;  // Proof - second 32 bytes
+        bytes32 proof_3;  // Proof - last 16 bytes
         uint shift_num;
     }
 
     address public regulator; // There could be multiple regulators, we assume one for convenience
 
     /* L-Chain variables */
-    bytes32 public DESC; // Description on the spectrum region, e.g., state-county name
-    bytes32 public INTF; // Interference model parameters for the spectrum region
+    string public DESC; // Description on the spectrum region, e.g., state-county name
+    string public INTF; // Interference model parameters for the spectrum region
     uint public T_SHIFT; // The L-Chain's shift length in G-Chain block cycles
     uint public T_EPOCH; // The L-Chain's epoch length in G-Chain block cycles
     mapping(address => Server) public Servers;   // Candidate servers
+    mapping(address => Witness) public Witnesses;       // For access control on witnesses
     address[5] public Witness_Addr;              // We fix 5 witnesses, Witnesses[0] is the anchor
-    mapping(address => Witness) Witnesses;       // For access control on witnesses
     address[5] public CurrentServers;            // We require 5 servers to serve an L-Chain
     uint public shift; // Shift count
     uint public epoch; // Epoch count
@@ -51,8 +54,8 @@ contract BDSAS_Regulate {
 
     /* Variables for SAS server reshuffling */
     mapping(address => Proposal) public ReshuffleProposals; // Candidate server' VRF info
-    uint8 reshuffle_status; // 0: accepting confirmation, 1: confirmation success, 2: confirmation failure (more than half are no-votes)
-    uint reshuffle_vote_count;
+    uint8 public reshuffle_status; // 0: accepting confirmation, 1: confirmation success, 2: confirmation failure (more than half are no-votes)
+    uint public reshuffle_vote_count;
     address[5] public ProposedServers; // For the next shift
 
     /** 
@@ -81,10 +84,10 @@ contract BDSAS_Regulate {
     }
  
     /**
-     * @dev Manage participant (server or anchor peer) of the contract. Callable by regulator.
+     * @dev Add an eligible server. Callable by regulator.
      * @param p: participant address, a: action (0: invalidate, 1: normal), de: description
      */
-    function ManageServer(address p, uint8 a, bytes32 de) public {
+    function ServerRegister(address p, uint8 a, string memory de) public {
         require(msg.sender == regulator, "Only regulator can manage participants.");
         require(a == 0 || a == 1, "Illegal action on server.");
         Servers[p].status = a;
@@ -95,25 +98,25 @@ contract BDSAS_Regulate {
      * @dev Publish/update new spectum access rules. Callable by regulator.
      * @param de: description, st: start time, et: end time, s: status 
      */
-    function Publish(bytes32 de, uint st, uint et, uint8 s) public {
+    function Publish(string memory de, uint st, uint et, uint8 s) public {
         require(msg.sender == regulator, "Only regulator can publish regulations.");
         Regulations.push(Regulation({desc: de, start_time: st, end_time: et, status: s}));
     }
 
     /** 
      * @dev Collect server reshuffle information. Callable by a server.
-     * @param pubkey: VRF public key, hash: VRF hash (result), proof: VRF proof
+     * @param pubkey: VRF public key, h1: hash part1, h2: hash part2, p1: proof part1, p2: proof part2, p3: proof part3, 
      */
-    function ReshufflePropose(bytes32 pubkey, bytes32[] memory hash, bytes32[] memory proof) public {
+    function ReshufflePropose(bytes32 pubkey, bytes32 h1, bytes32 h2, bytes32 p1, bytes32 p2, bytes32 p3) public {
         // By original design, we would need to have all VRF proposals submitted within one epoch near the shift's end
         // Such time constraints will be added in future; they are absent in this version for easier testing
         require(Servers[msg.sender].status == 0, "The SAS server does not exist or is no longer valid."); // Valid server
         ReshuffleProposals[msg.sender].pubkey = pubkey;
-        ReshuffleProposals[msg.sender].hash[0] = hash[0];
-        ReshuffleProposals[msg.sender].hash[1] = hash[1];
-        ReshuffleProposals[msg.sender].proof[0] = proof[0];
-        ReshuffleProposals[msg.sender].proof[1] = proof[1];
-        ReshuffleProposals[msg.sender].proof[2] = proof[2];
+        ReshuffleProposals[msg.sender].hash_1 = h1;
+        ReshuffleProposals[msg.sender].hash_2 = h2;
+        ReshuffleProposals[msg.sender].proof_1 = p1;
+        ReshuffleProposals[msg.sender].proof_2 = p2;
+        ReshuffleProposals[msg.sender].proof_3 = p3;
         ReshuffleProposals[msg.sender].shift_num = block.number / T_SHIFT;
     }
 
@@ -138,7 +141,7 @@ contract BDSAS_Regulate {
     /** 
      * @dev Collect SAS server group confirmations. Callable by a normal witness.
      */
-    function ReshuffleConfirm() public returns(uint8) {
+    function ReshuffleConfirm() public {
         require(reshuffle_status == 0, "The confirmation procedure ended.");
         require(msg.sender != Witness_Addr[0], "Only callable by a normal witness.");
         require(Witnesses[msg.sender].status == 1, "Invalid witness.");
@@ -152,7 +155,6 @@ contract BDSAS_Regulate {
             }
             reshuffle_status = 1; // Success
         }
-        return reshuffle_status;
     }
 
     /** 
@@ -160,9 +162,7 @@ contract BDSAS_Regulate {
      * @param state: local service state
      */
     function LocalUpdate(bytes32 state) public {
-        // Here we implement a simple compensation scheme: 
-        require
-        
+        // Here we implement a simple compensation scheme:         
     }
 
     function LocalUpdateConfirm(bytes32 state) public {
