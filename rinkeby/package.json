@@ -4,9 +4,9 @@
   "description": "",
   "main": "txSendDirectly.js",
   "dependencies": {
+    "@ethereumjs/tx": "^3.5.1",
     "web3": "^1.5.0"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

@@ -19,7 +19,7 @@ E = int(input("Epoch length: ")) # 1->10 G-Chain blocks
 
 # Open DOs
 DATA = np.load('DOs.npz')
-DOs = DATA['DOs']
+Servers = DATA['Server_Candidates']
 
 
 # def register_data_on_Contract(char *contract_addr, char *DO_address, char *DO_pkey, int contractType, int data_num, int operation, double price, char* DC_addr, int DC_action):
