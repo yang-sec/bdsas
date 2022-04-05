@@ -8,13 +8,13 @@ Contract_Addr = '0xDBd97d9d6e61dB19e3Dd0eAfcaF132507BEC1098'
 Regulator_Addr = '0x0a4a2f95e8625eb07a67f8dfa0cd566c515a01c3'
 Regulator_Prkey = '6307a6a04aa0e59aa308d64073ddbe28c81914a1e96353d7c89aa6c88cb611a4'
 
-P = 5 # default servers of an L-Chain
-L = 28 # default number of L-Chains
+P = 5 # default witnesses of an L-Chain
+L = 20 # default number of L-Chains
 
 
 
 # def register_data_on_Contract(contract_addr, DO_address, DO_pkey, contractType, data_num, operation, price, DC_addr, DC_action):
-def register_server(contract_addr, sender_addr, sender_prkey, server_addr, de, li, st, seq):
+def register_witness(contract_addr, sender_addr, sender_prkey, witness_addr, de, li, st, seq):
 
 	# Fields of a naked transaction
 	gas_price = int(2500000000)
@@ -22,7 +22,7 @@ def register_server(contract_addr, sender_addr, sender_prkey, server_addr, de, l
 	value = 0 # unit: wei
 
 	# data = '0x34d12fb4\n%024x%s\n%064x\n%064x\n%064x\n%064x\n%064x\n%s' % (0, server_addr.lstrip('0x'), 0xa0, li, st, seq, len(de), de.encode('ascii').hex())
-	data = '0x34d12fb4%024x%s%064x%064x%064x%064x%064x%s' % (0, server_addr[2:], 0xa0, li, st, seq, len(de), de.encode('ascii').hex())
+	data = '0x6c8ecf16%024x%s%064x%064x%064x%064x%064x%s' % (0, witness_addr[2:], 0xa0, li, st, seq, len(de), de.encode('ascii').hex())
 	for i in range(64-2*len(de)):
 		data += '0'
 	# print(data)
@@ -41,18 +41,11 @@ def register_server(contract_addr, sender_addr, sender_prkey, server_addr, de, l
 
 # Open DOs
 DATA = np.load('Servers_Witnesses_TestList.npz')
-Servers = DATA['Server_Candidates']
-
-
+Witnesses = DATA['Witnesses']
 
 idx = 0
 for l in range(L):
-	if l < 20:
-		continue
 	for p in range(P):
 		print('\nl: '+str(l)+', p: '+str(p))
 		idx = l*P + p
-		if l < 20:
-			register_server(Contract_Addr, Regulator_Addr, Regulator_Prkey, Servers[idx][0], 'SAS Server '+str(idx),l,2,p)
-		else:
-			register_server(Contract_Addr, Regulator_Addr, Regulator_Prkey, Servers[idx][0], 'SAS Server '+str(idx),l,1,p)
+		register_witness(Contract_Addr, Regulator_Addr, Regulator_Prkey, Witnesses[idx][0], 'Witness '+str(idx),l,1,p)

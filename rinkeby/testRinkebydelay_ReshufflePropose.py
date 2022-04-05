@@ -1,88 +1,78 @@
 import os
+import binascii
 import time
 import threading
 import numpy as np
-# import logging
+import random
+import string
 import concurrent.futures
 
 
-# ContractAddress = '0x208D3CEdFE8918298A726264B578A9BA2AE8c85B' # DO's own contract
-# DO_Address = '0xac5d434a4a9CF170BaaA5D1bE12B48c7fe358fa0'
-# DO_PrivateKey = '3bdc966729b1c929efa2053c40c77f31cf2e9048950c8f86af937780e5686dbd'
-DataConsumerAddress = '65843BE2Dd4ad3bC966584E2Fcbb38838d49054B'
-price = 0.01;  # ethers
-# NTH = 10
-
+Contract_Addr = '0xDBd97d9d6e61dB19e3Dd0eAfcaF132507BEC1098'
 NTH = int(input("Number Threads: "))
-
-# Open DOs
-DATA = np.load('DOs.npz')
-DOs = DATA['DOs']
 
 
 # def register_data_on_Contract(char *contract_addr, char *DO_address, char *DO_pkey, int contractType, int data_num, int operation, double price, char* DC_addr, int DC_action):
-def register_data_on_Contract(contract_addr, DO_address, DO_pkey, contractType, data_num, operation, price, DC_addr, DC_action):
+def reshuffle_proposal(contract_addr, sender_addr, sender_prkey, pubkey, h1, h2, h3, p1, p2, p3):
 
 	# char buffer1[1000], nodejs_arg[1000];
 
 	# Six fields of a naked transaction
-	gas_price = int(2000000000)
-	gasLimit = int(300000)
-	# char to[100];
+	gas_price = int(2500000000)
+	gasLimit = int(1000000)
 	value = 0 # unit: wei
-	# char data[500];
-
-	# char address[100], pkey[200];
-	# sprintf(to, "%s", contract_addr);
-	# sprintf(address, "%s", DO_address);
-	# sprintf(pkey, "%s", DO_pkey);
-
-	price_wei = int(price * 1000000000000000000)
 
 	# sprintf(data, '0xcc527740%064X%064X%064lX%024X%s%064X', data_num, operation, price_wei, 0, DC_addr, DC_action);
-	data = '0xcc527740%064X%064X%064lX%024X%s%064X' % (data_num, operation, price_wei, 0, DC_addr, DC_action)
-
+	data = '0x17b54798%064s%064s%064s%064s%064s%064s%064s' % (pubkey, h1, h2, h3, p1, p2, p3)
+	# print(data)
 	# Get the digest (RLP_hash) of the nake transaction
 	# sprintf(nodejs_arg, "%ld %ld %s %ld %s %s %s", gas_price, gasLimit, to, value, data, address, pkey);
-	nodejs_arg = '%ld %ld %s %ld %s %s %s' % (gas_price, gasLimit, contract_addr, value, data, DO_address, DO_pkey)
+	nodejs_arg = '%ld %ld %s %ld %s %s %s' % (gas_price, gasLimit, contract_addr, value, data, sender_addr, sender_prkey)
 	# sprintf(buffer1, "node App/txSendDirectly.js %s", nodejs_arg);
 	buffer1 = 'node txSendDirectly.js %s' % (nodejs_arg)
 	# print(buffer1)
 
 	ret = os.system(buffer1)
-	# return ret
 	return time.time()
 
-data_counter = 0
-OperationNum = 0
+## We use random strings to simulate VRF hashes, proofsm and public keys
+pk = []
+h1 = []
+h2 = []
+h3 = []
+p1 = []
+p2 = []
+p3 = []
+for n in range(NTH):
+	tmp = '%s' % binascii.b2a_hex(os.urandom(32))
+	pk.append(tmp[2:-1])
+	tmp = '%s' % binascii.b2a_hex(os.urandom(32))
+	h1.append(tmp[2:-1])
+	tmp = '%s' % binascii.b2a_hex(os.urandom(32))
+	h2.append(tmp[2:-1])
+	tmp = '%s' % binascii.b2a_hex(os.urandom(32))
+	h3.append(tmp[2:-1])
+	tmp = '%s' % binascii.b2a_hex(os.urandom(32))
+	p1.append(tmp[2:-1])
+	tmp = '%s' % binascii.b2a_hex(os.urandom(32))
+	p2.append(tmp[2:-1])
+	tmp = '%s' % binascii.b2a_hex(os.urandom(32))
+	p3.append(tmp[2:-1])
 
 
-# threads = list()
-# for i in range(NTH):
-# 	x = threading.Thread(target=register_data_on_Contract, args=(DOs[i][2], DOs[i][0], DOs[i][1], 0, data_counter, OperationNum, price, DataConsumerAddress, 0,))
-# 	threads.append(x)
-# 	x.start()
 
-# tic = time.time()
-# for index, thread in enumerate(threads):
-# 	thread.join()
-# 	print('Thread',index,'done')  
+DATA = np.load('Servers_Witnesses_TestList.npz')
+Servers = DATA['Server_Candidates']
 
-# pararange = np.arange(NTH)
-# print(pararange)
 tocs=[]
 tic = time.time()
 with concurrent.futures.ThreadPoolExecutor() as executor:
-	# future = executor.submit(register_data_on_Contract, DOs[0][2], DOs[0][0], DOs[0][1], 0, data_counter, OperationNum, price, DataConsumerAddress, 0)
-	futures = [executor.submit(register_data_on_Contract, DOs[i][2], DOs[i][0], DOs[i][1], 0, data_counter, OperationNum, price, DataConsumerAddress, 0) for i in range(NTH)]
-	# return_value = future.result()
-	# print(return_value)
+	futures = [executor.submit(reshuffle_proposal, Contract_Addr, Servers[i][0], Servers[i][1], pk[i], h1[i], h2[i], h3[i], p1[i], p2[i], p3[i]) for i in range(NTH)]
 	tocs = [f.result() for f in futures]
 
 tocs = np.array(tocs)
 elapses = tocs - tic
-# toc = time.time()
-# print(tocs-tic)
+
 print('Collected',len(elapses),'/',NTH)
 print('mean:', np.mean(elapses))
 print('std:', np.std(elapses))
