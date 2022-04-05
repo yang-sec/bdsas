@@ -8,9 +8,8 @@ Contract_Addr = '0xcec6fd8cde51b7bbd92bdf82314508e1f53081d2'
 Regulator_Addr = '0x0a4a2f95e8625eb07a67f8dfa0cd566c515a01c3'
 Regulator_Prkey = '6307a6a04aa0e59aa308d64073ddbe28c81914a1e96353d7c89aa6c88cb611a4'
 
-P = 5
-L = 1
-E = int(input("Epoch length: ")) # 1->10 G-Chain blocks
+P = 5 # default servers of an L-Chain
+L = 28 # default number of L-Chains
 
 
 
@@ -44,32 +43,42 @@ def register_server(contract_addr, sender_addr, sender_prkey, server_addr, de, l
 DATA = np.load('Servers_Witnesses_TestList.npz')
 Servers = DATA['Server_Candidates']
 
-tocs = []
-tic = time.time()
-futures=[]
-with concurrent.futures.ThreadPoolExecutor() as executor:
-	for l in range(L):
-		for p in range(P):
-			idx = l*P + p
-			futures.append(executor.submit(register_server, Contract_Addr, Regulator_Addr, Regulator_Prkey, Servers[idx][0], 'SAS Server '+str(idx),l,2,p))
-		if l < L-1:
-			time.sleep(15*E/L) # 150 = one epoch time = 10 G-Chain block cycles
+# tocs = []
+# tic = time.time()
+# futures=[]
+# with concurrent.futures.ThreadPoolExecutor() as executor:
+# 	for l in range(L):
+# 		for p in range(P):
+# 			idx = l*P + p
+# 			futures.append(executor.submit(register_server, Contract_Addr, Regulator_Addr, Regulator_Prkey, Servers[idx][0], 'SAS Server '+str(idx),l,2,p))
+# 		if l < L-1:
+# 			time.sleep(15*E/L) # 150 = one epoch time = 10 G-Chain block cycles
 
-	tocs = [f.result() for f in futures]
+# 	tocs = [f.result() for f in futures]
 
-tocs = np.array(tocs)
-elapses = tocs - tic
-
+idx = 0
 for l in range(L):
+	if l <= 4:
+		continue
 	for p in range(P):
+		print('l: '+str(l)+', p: '+str(p))
 		idx = l*P + p
-		elapses[idx] -= 15*E/L * l
+		register_server(Contract_Addr, Regulator_Addr, Regulator_Prkey, Servers[idx][0], 'SAS Server '+str(idx),l,2,p)
+		time.sleep(5)
+
+# tocs = np.array(tocs)
+# elapses = tocs - tic
+
+# for l in range(L):
+# 	for p in range(P):
+# 		idx = l*P + p
+# 		elapses[idx] -= 15*E/L * l
 
 
-# toc = time.time()
-# print(tocs-tic)
-print('Collected',len(elapses),'/',L*P)
-print('mean:', np.mean(elapses))
-print('std:', np.std(elapses))
-print('min max:', elapses.min(), elapses.max())
+# # toc = time.time()
+# # print(tocs-tic)
+# print('Collected',len(elapses),'/',L*P)
+# print('mean:', np.mean(elapses))
+# print('std:', np.std(elapses))
+# print('min max:', elapses.min(), elapses.max())
 

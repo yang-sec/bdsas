@@ -49,19 +49,17 @@ contract BDSAS_Regulate {
     uint public T_EPOCH; // The L-Chain's epoch length in G-Chain block cycles 
     mapping(address => Server) public Servers; // Candidate servers
     mapping(address => Witness) public Witnesses; // For access control on witnesses
-    address[20][5] public Witnesses_Addr; // We fix 20 L-Chains, 5 witnesses to an L-Chain, with Witnesses[0] being the anchor
-    address[20][5] public CurrServers_Addr; // We require 5 servers to serve an L-Chain
-    uint public shift; // Shift count (shared by all 20 L-Chains)
-    uint[20] public epoch; // Epoch count (for each L-Chain)
+    address[5][20] public Witnesses_Addr; // We fix 20 L-Chains, 5 witnesses to an L-Chain, with Witnesses[.][0] being the anchor
+    address[5][20] public CurrServers_Addr; // We require 5 servers to serve an L-Chain
     Regulation[] public Regulations; // List of short-term regulations
-    bytes32[20][5] public LocalStates; // Service states of each L-Chain, provided by all serving servers
+    bytes32[5][20] public LocalStates; // Service states of each L-Chain, provided by all serving servers
 
     /* Variables for SAS server reshuffling */
     mapping(address => Proposal) public ReshuffleProposals; // Candidate server' VRF info
     uint8[20] public reshuffle_status; // 0: accepting confirmation, 1: confirmation success, 2: confirmation failure (more than half are no-votes)
     uint public reshuffle_vote_count;
     uint public reshuffle_yesvote_count;
-    address[20][5] public ProposedServers_Addr; // For the next shift
+    address[5][20] public ProposedServers_Addr; // For the next shift
 
     /** 
      * @dev Create a new regulatory contract.
