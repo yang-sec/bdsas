@@ -22,12 +22,11 @@ E_Thresh = ESet * 15
 plot1 = plt.figure(1,figsize=(6, 5))
 # plt.figure(figsize=(6, 5))
 # create stacked errorbars:
-plt.errorbar(NSet, means_S, [means_S - mins_S, maxes_S - means_S], linestyle='-', marker='o', markersize=7, color='green', ecolor='gray', capsize=5, capthick=2)
+plt.errorbar(NSet, means_S, [means_S - mins_S, maxes_S - means_S], linestyle='', marker='o', markersize=7, color='green', ecolor='gray', capsize=5, capthick=2)
 plt.errorbar(NSet, means_S, std_S, linestyle='None', lw=7, color='orange')
 # plt.plot(np.arange(150),150*np.ones(150),':',color='red')
 
 plt.legend([
-	'Epoch time',
 	'min/mean/max',
 	'std'
 	], fontsize='18')
@@ -45,7 +44,7 @@ plt.savefig("g-chain-latency-bursty.pdf", bbox_inches='tight')
 plot2 = plt.figure(2,figsize=(6, 5))
 # plt.figure(figsize=(6, 5))
 # create stacked errorbars:
-plt.errorbar(ESet, means_E, [means_E - mins_E, maxes_E - means_E], linestyle='-', marker='o', markersize=7, color='green', ecolor='gray', capsize=5, capthick=2)
+plt.errorbar(ESet, means_E, [means_E - mins_E, maxes_E - means_E], linestyle='', marker='o', markersize=7, color='green', ecolor='gray', capsize=5, capthick=2)
 plt.errorbar(ESet, means_E, std_E, linestyle='None', lw=7, color='orange')
 plt.plot(ESet,E_Thresh,':s',color='red')
 
