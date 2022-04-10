@@ -97,9 +97,26 @@ func (s *SmartContract) Access(ctx contractapi.TransactionContextInterface, user
 }
 
 /* 
-  Inquiry returns the availability of a targeted channel-location in the world state
+  Inquiry returns the availability of a potential assignment in the world state (similar to but slightly different from ReadAssignment)
 */
-func (s *SmartContract) Inquiry(ctx contractapi.TransactionContextInterface, channel int, location int) (*Assignment, error) {
+func (s *SmartContract) Inquiry(ctx contractapi.TransactionContextInterface, channel int, location int) (int, error) {
+  
+  id := "ACCESS" + strconv.Itoa(channel) + "_" + strconv.Itoa(location)
+  assignmentJSON, err := ctx.GetStub().GetState(id)
+  if err != nil {
+    return 9, fmt.Errorf("failed to read from world state: %v", err)
+  }
+  if assignmentJSON == nil {
+    return 0, nil // Available
+  }
+
+  return 1, nil // Occupied. Here we return an "int" in case there are more states to consider
+}
+
+/* 
+  ReadAssignment returns the existence of an assignment in the world state
+*/
+func (s *SmartContract) ReadAssignment(ctx contractapi.TransactionContextInterface, channel int, location int) (*Assignment, error) {
   
   id := "ACCESS" + strconv.Itoa(channel) + "_" + strconv.Itoa(location)
   assignmentJSON, err := ctx.GetStub().GetState(id)
@@ -107,7 +124,7 @@ func (s *SmartContract) Inquiry(ctx contractapi.TransactionContextInterface, cha
     return nil, fmt.Errorf("failed to read from world state: %v", err)
   }
   if assignmentJSON == nil {
-    return nil, fmt.Errorf("[Yes] %s is available", id)
+    return nil, fmt.Errorf("assignment %s does not exist available", id)
   }
 
   var assignment Assignment
@@ -124,9 +141,9 @@ func (s *SmartContract) Inquiry(ctx contractapi.TransactionContextInterface, cha
 */
 func (s *SmartContract) Heartbeat(ctx contractapi.TransactionContextInterface, user string, channel int, location int, eirp int, desc string) error {
   
-  assignment, err := s.Inquiry(ctx, channel, location)
+  assignment, err := s.ReadAssignment(ctx, channel, location)
   if err != nil {
-    return err
+    return fmt.Errorf("assignment ID %s does not exist ", assignment.ID)
   }
   if assignment.ID != "ACCESS" + strconv.Itoa(channel) + "_" + strconv.Itoa(location) {
     return fmt.Errorf("assignment ID %s does not match the provided channel and location ", assignment.ID)
@@ -137,9 +154,9 @@ func (s *SmartContract) Heartbeat(ctx contractapi.TransactionContextInterface, u
 
   assignment.EIRP = eirp
   assignment.Desc = desc
-  assignmentJSON, err := json.Marshal(assignment)
-  if err != nil {
-    return err
+  assignmentJSON, err1 := json.Marshal(assignment)
+  if err1 != nil {
+    return err1
   }
 
   return ctx.GetStub().PutState(assignment.ID, assignmentJSON)

@@ -1,0 +1,23 @@
+test:
+    name: spectrum-access-contract-benchmark
+    description: test benchmark
+    workers:
+      type: local
+      number: 100
+    rounds:
+      - label: round1
+        description: Inquiry benchmark
+        txDuration: 500
+        rateControl: 
+          type: maximum-rate
+          opts:
+            tps: 89
+            step: 5
+            sampleInterval: 20
+            includeFailed: true
+        workload:
+          module: workload/spectrumInquiry.js
+          arguments:
+            channels: 10
+            locations: 100
+            contractId: basic

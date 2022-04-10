@@ -1,0 +1,23 @@
+test:
+    name: spectrum-access-contract-benchmark
+    description: test benchmark
+    workers:
+      type: local
+      number: 100
+    rounds:
+      - label: round1
+        description: Heartbeat benchmark
+        txDuration: 300
+        rateControl: 
+          type: maximum-rate
+          opts:
+            tps: 53
+            step: 5
+            sampleInterval: 20
+            includeFailed: false
+        workload:
+          module: workload/spectrumHeartbeat.js
+          arguments:
+            channels: 10
+            locations: 100
+            contractId: basic
