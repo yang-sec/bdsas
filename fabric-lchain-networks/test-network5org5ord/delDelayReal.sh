@@ -1,0 +1,11 @@
+docker exec peer0.org1.example.com tc qdisc del dev eth0 root handle 1: htb default 10
+docker exec peer0.org2.example.com tc qdisc del dev eth0 root handle 1: htb default 10
+docker exec peer0.org3.example.com tc qdisc del dev eth0 root handle 1: htb default 10
+docker exec peer0.org4.example.com tc qdisc del dev eth0 root handle 1: htb default 10
+docker exec peer0.org5.example.com tc qdisc del dev eth0 root handle 1: htb default 10
+docker exec orderer1.example.com tc qdisc del dev eth0 root handle 1: htb default 10
+docker exec orderer2.example.com tc qdisc del dev eth0 root handle 1: htb default 10
+docker exec orderer3.example.com tc qdisc del dev eth0 root handle 1: htb default 10
+docker exec orderer4.example.com tc qdisc del dev eth0 root handle 1: htb default 10
+docker exec orderer5.example.com tc qdisc del dev eth0 root handle 1: htb default 10
+docker exec cli tc qdisc del dev eth0 root handle 1: htb default 10
