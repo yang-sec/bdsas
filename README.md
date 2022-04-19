@@ -10,16 +10,17 @@ Deployed G-Chain Regulator contract: https://rinkeby.etherscan.io/address/0xDBd9
 L-Chain test network source code: fabric-lchain-networks/
 
 ## How to Instantiate an L-Chain test network
-1. cd into one of the test network directory
-2. Run "test.sh"
-3. (Optional) Run "./addDelay.sh" to simulate delays between nodes
-4. **Test with Hyperledger Caliper**
-5. When ending the test, run "./delDelay.sh" and then "./network.sh down" 
+1. Follow https://hyperledger-fabric.readthedocs.io/en/latest/getting_started_run_fabric.html to install and test run Hyperledger Fabric
+2. cd into one of the test networks directories in fabric-lchain-networks/
+3. Run "test.sh"
+4. (Optional) Run "./addDelay.sh" to simulate delays between nodes
+5. **Test with Hyperledger Caliper**
+6. When ending the test, run "./delDelay.sh" and then "./network.sh down" 
 
 ## Test with Hyperledger Caliper
 
 After Step 3 of the above:
-1. cd into the caliper-workspace directory
+1. cd into the caliper-workspace/ directory
 2. Edit networks/networkConfig.yaml for the corresponding test network
 3. Run the following command to get the benchmark results (please be patient, it can be a 3-minute wait):
 ```
