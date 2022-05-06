@@ -4,6 +4,7 @@ BD-SAS is a blockchain-based decentralized spectrum access system (SAS) designed
 
 # G-Chain Emulation
 G-Chain Regulator contract source code: contracts/G-Chain_Regulate.sol
+
 Deployed G-Chain Regulator contract: https://rinkeby.etherscan.io/address/0xDBd97d9d6e61dB19e3Dd0eAfcaF132507BEC1098
 
 # L-Chain Prototypes
@@ -18,12 +19,11 @@ L-Chain test network source code: fabric-lchain-networks/
 6. When ending the test, run "./delDelay.sh" and then "./network.sh down" 
 
 ## Test with Hyperledger Caliper
-
-After Step 3 of the above:
+After Step 3 (or 4) of the above:
 1. cd into the caliper-workspace/ directory
-2. Edit networks/networkConfig.yaml for the corresponding test network
+2. Edit networks/networkConfig.yaml for the corresponding test network name
 3. Run the following command to get the benchmark results (please be patient, it can be a 3-minute wait):
 ```
-npx caliper launch manager --caliper-workspace ./ --caliper-networkconfig networks/networkConfig.yaml --caliper-benchconfig benchmarks/YourBenchmark.yaml --caliper-flow-only-test --caliper-fabric-gateway-enabled
+npx caliper launch manager --caliper-workspace ./ --caliper-networkconfig networks/networkConfig.yaml --caliper-benchconfig benchmarks/SpectrumAccessBenchmark_Access.yaml --caliper-flow-only-test --caliper-fabric-gateway-enabled
 ```
-4. To test with different benchmark settings, replace "YourBenchmark.yaml" with the existing benchmark files in the benchmarks directory or create your own.
+4. To test with different benchmark settings, replace "SpectrumAccessBenchmark_Access.yaml" with the existing benchmark files in the benchmarks directory or your own benchmark files.
