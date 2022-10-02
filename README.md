@@ -1,6 +1,6 @@
 # BD-SAS
 
-BD-SAS is a blockchain-based decentralized spectrum access system (SAS) designed for enabled decentralized and automated dynamic spectrum sharing (DSS). It decentralizes the current SAS as has been deploted for the CBRS band and achieves (1) fault tolerance to individual SAS server failures and (2) automation of spectrum management functions.
+BD-SAS is a blockchain-based decentralized spectrum access system (SAS) designed to enable dynamic spectrum sharing (DSS). It decentralizes the current SAS as has been deployed for the CBRS band and achieves (1) fault tolerance to individual SAS server failures and (2) automatic synchronization of spectrum allocations.
 
 # G-Chain Emulation
 G-Chain Regulator contract source code: contracts/G-Chain_Regulate.sol
