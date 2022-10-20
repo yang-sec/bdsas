@@ -3,9 +3,9 @@
 BD-SAS is a blockchain-based decentralized spectrum access system (SAS) designed to enable dynamic spectrum sharing (DSS). It decentralizes the current SAS as has been deployed for the CBRS band and achieves (1) fault tolerance to individual SAS server failures and (2) automatic synchronization of spectrum allocations.
 
 # G-Chain Emulation
-G-Chain Regulator contract source code: contracts/G-Chain_Regulate.sol
+G-Chain contract source code: contracts/G-Chain_Regulate.sol
 
-Deployed G-Chain Regulator contract: https://rinkeby.etherscan.io/address/0xDBd97d9d6e61dB19e3Dd0eAfcaF132507BEC1098
+We use the Ethereum Rinkeby testnet for emulating G-Chain. Deployed G-Chain contract: https://rinkeby.etherscan.io/address/0xDBd97d9d6e61dB19e3Dd0eAfcaF132507BEC1098
 
 # L-Chain Prototypes
 L-Chain test network source code: fabric-lchain-networks/
